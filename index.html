@@ -30,7 +30,7 @@
     </nav>
     <div class="hero-content">
       <span class="hero-badge">Guía Interactiva 2026</span>
-      <h1>Aprende <span class="gradient-text">Scrum</span><br>de forma divertida</h1>
+      <h1 id="heroTitle">Aprende <span class="gradient-text">Scrum</span><br>de forma divertida</h1>
       <p class="hero-sub">Domina el framework ágil más popular del mundo con actividades interactivas, juegos y ejemplos
         prácticos.</p>
       <a href="#que-es" class="cta-btn">Comenzar ahora →</a>
@@ -517,6 +517,18 @@
           <p id="toggleText">¿No tienes cuenta? <a href="#" onclick="toggleAuthMode(event)">Regístrate aquí</a></p>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL COMPLETAR PERFIL (Para Google Users) -->
+  <div class="modal-overlay" id="completeProfileOverlay">
+    <div class="modal-box" style="max-width:350px">
+      <h3 style="margin-bottom:1rem">¡Casi listo! 🚀</h3>
+      <p style="margin-bottom:1.5rem; color:var(--text2)">Para completar tu registro, por favor ingresa tu número de grupo:</p>
+      <div class="input-group">
+        <input type="text" id="googleGroupCode" placeholder="Ej: Grupo 04">
+      </div>
+      <button class="cta-btn" style="width:100%; border:none; margin-top:1rem" onclick="saveGoogleExtraData()">Guardar y Continuar</button>
     </div>
   </div>
 

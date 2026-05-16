@@ -343,9 +343,21 @@ setTimeout(() => {
       const profileRef = ref(db, 'users/' + user.uid + '/profile');
       onValue(profileRef, (snapshot) => {
         const data = snapshot.val();
+        
+        // Si no tiene código, mostramos el modal de completar perfil
+        if (!data || !data.code) {
+          document.getElementById('completeProfileOverlay').classList.add('open');
+        } else {
+          document.getElementById('completeProfileOverlay').classList.remove('open');
+        }
+
         const displayName = (data && data.name) ? data.name : user.email.split('@')[0];
         const initial = displayName.charAt(0).toUpperCase();
         
+        // SALUDO PERSONALIZADO EN EL HERO
+        const firstName = displayName.split(' ')[0];
+        document.getElementById('heroTitle').innerHTML = `¡Hola, <span class="gradient-text">${firstName}</span>! 👋<br>Aprende Scrum de forma divertida`;
+
         navItem.innerHTML = `
           <div class="user-profile">
             <div class="user-avatar">${initial}</div>
@@ -355,6 +367,8 @@ setTimeout(() => {
         `;
       });
     } else {
+      // RESET DEL TÍTULO SI NO HAY SESIÓN
+      document.getElementById('heroTitle').innerHTML = `Aprende <span class="gradient-text">Scrum</span><br>de forma divertida`;
       navItem.innerHTML = `<button class="nav-auth-btn" onclick="openAuthModal()">Iniciar Sesión</button>`;
     }
   });
@@ -397,5 +411,30 @@ async function saveScore(gameName, score, total) {
     console.log(`Puntaje de ${gameName} guardado en Firebase.`);
   } catch (error) {
     console.error("Error al guardar puntaje:", error);
+  }
+}
+
+async function saveGoogleExtraData() {
+  const code = document.getElementById('googleGroupCode').value;
+  if (!code) return alert("Por favor ingresa tu número de grupo");
+  
+  const { auth, db, ref, set } = window.firebaseAuth;
+  const user = auth.currentUser;
+  
+  if (user) {
+    try {
+      await set(ref(db, 'users/' + user.uid + '/profile'), {
+        name: user.displayName || user.email.split('@')[0],
+        code: code,
+        email: user.email,
+        method: 'google',
+        updatedAt: new Date().toISOString()
+      });
+      document.getElementById('completeProfileOverlay').classList.remove('open');
+      alert('¡Perfil completado!');
+    } catch (error) {
+      console.error(error);
+      alert('Error al guardar: ' + error.message);
+    }
   }
 }
