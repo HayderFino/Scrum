@@ -196,7 +196,11 @@ function checkSort(){
     else item.classList.add('wrong-pos');
   });
   const r=document.getElementById('sortResult');
-  if(correct===5){r.innerHTML='🥳 ¡Orden perfecto!';r.style.color='#4ade80';}
+  if(correct===5){
+    r.innerHTML='🥳 ¡Orden perfecto!';
+    r.style.color='#4ade80';
+    saveScore('ordenar_sprint', 1, 1);
+  }
   else{r.innerHTML=`🎯 ${correct}/5 en la posición correcta`;r.style.color='#f59e0b';}
 }
 function resetSort(){
@@ -409,15 +413,17 @@ function openProfileModal() {
       const perfectScores = [
         (scores.quiz_scrum?.score || 0) >= 6,
         (scores.verdad_falso?.score || 0) >= 8,
-        (scores.completar_frase?.score || 0) >= 5
+        (scores.completar_frase?.score || 0) >= 5,
+        (scores.ordenar_sprint?.score || 0) >= 1
       ].filter(Boolean).length;
 
       let level = "Novato de Scrum";
-      let progress = (perfectScores / 3) * 100;
+      let progress = (perfectScores / 4) * 100;
       
       if(perfectScores === 1) level = "Aprendiz Ágil";
       if(perfectScores === 2) level = "Practicante Pro";
-      if(perfectScores === 3) level = "👑 SCRUM MASTER";
+      if(perfectScores === 3) level = "Experto en Eventos";
+      if(perfectScores === 4) level = "👑 SCRUM MASTER";
 
       document.getElementById('pLevelBadge').textContent = `Rango: ${level}`;
       document.getElementById('pProgressText').textContent = `${Math.round(progress)}%`;
@@ -425,7 +431,7 @@ function openProfileModal() {
 
       // Efecto Maestro
       const modalBox = document.querySelector('.profile-modal');
-      if(perfectScores === 3) modalBox.classList.add('master-mode');
+      if(perfectScores === 4) modalBox.classList.add('master-mode');
       else modalBox.classList.remove('master-mode');
       
       // Mostrar puntajes detallados
@@ -433,6 +439,7 @@ function openProfileModal() {
         <div class="stat-item"><span>Quiz Scrum:</span> <strong>${scores.quiz_scrum?.score || 0}/6 ${scores.quiz_scrum?.score >= 6 ? '⭐' : ''}</strong></div>
         <div class="stat-item"><span>Verdadero/Falso:</span> <strong>${scores.verdad_falso?.score || 0}/8 ${scores.verdad_falso?.score >= 8 ? '⭐' : ''}</strong></div>
         <div class="stat-item"><span>Completar Frase:</span> <strong>${scores.completar_frase?.score || 0}/5 ${scores.completar_frase?.score >= 5 ? '⭐' : ''}</strong></div>
+        <div class="stat-item"><span>Ordenar Sprint:</span> <strong>${scores.ordenar_sprint?.score || 0}/1 ${scores.ordenar_sprint?.score >= 1 ? '⭐' : ''}</strong></div>
       `;
     }
   });
