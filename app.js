@@ -336,42 +336,54 @@ setTimeout(() => {
   if(!window.firebaseAuth) return;
   
   const { auth, db, ref, onValue, onAuthStateChanged, signOut } = window.firebaseAuth;
+  
   onAuthStateChanged(auth, (user) => {
     const navItem = document.getElementById('authNavItem');
+    const heroTitle = document.getElementById('heroTitle');
+    
     if (user) {
-      // Intentar obtener el nombre desde el perfil en la DB
+      // 1. Actualización inmediata con datos locales
+      const initialName = user.displayName || user.email.split('@')[0];
+      renderUserNavbar(initialName);
+      heroTitle.innerHTML = `¡Hola, <span class="gradient-text">${initialName.split(' ')[0]}</span>! 👋<br>Aprende Scrum de forma divertida`;
+
+      // 2. Sincronización con la Base de Datos
       const profileRef = ref(db, 'users/' + user.uid + '/profile');
       onValue(profileRef, (snapshot) => {
         const data = snapshot.val();
         
-        // Si no tiene código, mostramos el modal de completar perfil
+        // Verificar si falta el código de grupo
         if (!data || !data.code) {
           document.getElementById('completeProfileOverlay').classList.add('open');
         } else {
           document.getElementById('completeProfileOverlay').classList.remove('open');
         }
 
-        const displayName = (data && data.name) ? data.name : user.email.split('@')[0];
-        const initial = displayName.charAt(0).toUpperCase();
-        
-        // SALUDO PERSONALIZADO EN EL HERO
-        const firstName = displayName.split(' ')[0];
-        document.getElementById('heroTitle').innerHTML = `¡Hola, <span class="gradient-text">${firstName}</span>! 👋<br>Aprende Scrum de forma divertida`;
-
-        navItem.innerHTML = `
-          <div class="user-profile">
-            <div class="user-avatar">${initial}</div>
-            <span style="font-size:.85rem; font-weight:500">${displayName}</span>
-            <button onclick="window.firebaseAuth.signOut(window.firebaseAuth.auth)" title="Cerrar Sesión" style="background:none; border:none; color:var(--pink); cursor:pointer; font-size:1.2rem; margin-left:.5rem">✕</button>
-          </div>
-        `;
+        if (data && data.name) {
+          renderUserNavbar(data.name);
+          document.getElementById('heroTitle').innerHTML = `¡Hola, <span class="gradient-text">${data.name.split(' ')[0]}</span>! 👋<br>Aprende Scrum de forma divertida`;
+        }
+      }, (error) => {
+        console.error("Error al leer perfil:", error);
       });
     } else {
-      // RESET DEL TÍTULO SI NO HAY SESIÓN
+      // Usuario deslogueado
       document.getElementById('heroTitle').innerHTML = `Aprende <span class="gradient-text">Scrum</span><br>de forma divertida`;
       navItem.innerHTML = `<button class="nav-auth-btn" onclick="openAuthModal()">Iniciar Sesión</button>`;
     }
   });
+
+  function renderUserNavbar(name) {
+    const navItem = document.getElementById('authNavItem');
+    const initial = name.charAt(0).toUpperCase();
+    navItem.innerHTML = `
+      <div class="user-profile">
+        <div class="user-avatar">${initial}</div>
+        <span style="font-size:.85rem; font-weight:500">${name}</span>
+        <button onclick="window.firebaseAuth.signOut(window.firebaseAuth.auth)" title="Cerrar Sesión" style="background:none; border:none; color:var(--pink); cursor:pointer; font-size:1.2rem; margin-left:.5rem">✕</button>
+      </div>
+    `;
+  }
 }, 1000);
 
 async function handleGoogleLogin() {
