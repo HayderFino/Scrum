@@ -398,17 +398,41 @@ function openProfileModal() {
   onValue(userRef, (snapshot) => {
     const data = snapshot.val();
     if (data) {
-      const name = data.profile?.name || user.email.split('@')[0];
+      const profile = data.profile || {};
+      const scores = data.scores || {};
+      const name = profile.name || user.email.split('@')[0];
+      
       document.getElementById('pName').textContent = name;
-      document.getElementById('pCode').textContent = `Grupo: ${data.profile?.code || '-'}`;
       document.getElementById('pAvatar').textContent = name.charAt(0).toUpperCase();
       
-      // Mostrar puntajes
-      const scores = data.scores || {};
+      // CALCULAR NIVELES Y PROGRESO
+      const perfectScores = [
+        (scores.quiz_scrum?.score || 0) >= 6,
+        (scores.verdad_falso?.score || 0) >= 8,
+        (scores.completar_frase?.score || 0) >= 5
+      ].filter(Boolean).length;
+
+      let level = "Novato de Scrum";
+      let progress = (perfectScores / 3) * 100;
+      
+      if(perfectScores === 1) level = "Aprendiz Ágil";
+      if(perfectScores === 2) level = "Practicante Pro";
+      if(perfectScores === 3) level = "👑 SCRUM MASTER";
+
+      document.getElementById('pLevelBadge').textContent = `Rango: ${level}`;
+      document.getElementById('pProgressText').textContent = `${Math.round(progress)}%`;
+      document.getElementById('pProgressBar').style.width = `${progress}%`;
+
+      // Efecto Maestro
+      const modalBox = document.querySelector('.profile-modal');
+      if(perfectScores === 3) modalBox.classList.add('master-mode');
+      else modalBox.classList.remove('master-mode');
+      
+      // Mostrar puntajes detallados
       document.getElementById('pStats').innerHTML = `
-        <div class="stat-item"><span>Quiz Scrum:</span> <strong>${scores.quiz_scrum?.score || 0}/${scores.quiz_scrum?.total || 6}</strong></div>
-        <div class="stat-item"><span>Verdadero/Falso:</span> <strong>${scores.verdad_falso?.score || 0}/${scores.verdad_falso?.total || 8}</strong></div>
-        <div class="stat-item"><span>Completar Frase:</span> <strong>${scores.completar_frase?.score || 0}/${scores.completar_frase?.total || 5}</strong></div>
+        <div class="stat-item"><span>Quiz Scrum:</span> <strong>${scores.quiz_scrum?.score || 0}/6 ${scores.quiz_scrum?.score >= 6 ? '⭐' : ''}</strong></div>
+        <div class="stat-item"><span>Verdadero/Falso:</span> <strong>${scores.verdad_falso?.score || 0}/8 ${scores.verdad_falso?.score >= 8 ? '⭐' : ''}</strong></div>
+        <div class="stat-item"><span>Completar Frase:</span> <strong>${scores.completar_frase?.score || 0}/5 ${scores.completar_frase?.score >= 5 ? '⭐' : ''}</strong></div>
       `;
     }
   });
