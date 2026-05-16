@@ -101,6 +101,7 @@ function renderQuiz(){
     document.getElementById('quizOpts').innerHTML='';
     document.getElementById('quizScore').textContent=`Puntuación final: ${qScore}/${quizData.length}`;
     document.getElementById('quizProg').style.width='100%';
+    saveScore('quiz_scrum', qScore, quizData.length);
     return;
   }
   const q=quizData[qIdx];
@@ -149,6 +150,7 @@ function renderTF(){
     document.getElementById('tfFb').textContent='';
     document.getElementById('tfScore').textContent=`Puntuación: ${tfScore}/${tfData.length}`;
     document.getElementById('tfProg').style.width='100%';
+    saveScore('verdad_falso', tfScore, tfData.length);
     return;
   }
   document.getElementById('tfQ').textContent=`${tfIdx+1}/${tfData.length}. ${tfData[tfIdx].q}`;
@@ -221,6 +223,7 @@ function renderFill(){
     document.getElementById('fillQ').textContent='¡Juego completado!';
     document.getElementById('fillOpts').innerHTML='';
     document.getElementById('fillScore').textContent=`Puntuación: ${fillScore}/${fillData.length}`;
+    saveScore('completar_frase', fillScore, fillData.length);
     return;
   }
   const d=fillData[fillIdx];
@@ -250,5 +253,149 @@ function fillAnswer(i){
 function resetFill(){fillIdx=0;fillScore=0;fillAnswered=false;renderFill();}
 renderFill();
 
+
 // === INIT SORT ===
 resetSort();
+
+// === AUTH LOGIC ===
+let authMode = 'login'; // 'login' o 'signup'
+
+function openAuthModal() {
+  document.getElementById('authModalOverlay').classList.add('open');
+}
+
+function closeAuthModal() {
+  document.getElementById('authModalOverlay').classList.remove('open');
+}
+
+function toggleAuthMode(e) {
+  e.preventDefault();
+  authMode = authMode === 'login' ? 'signup' : 'login';
+  
+  const title = document.getElementById('authTitle');
+  const subtitle = document.getElementById('authSubtitle');
+  const btn = document.getElementById('authBtn');
+  const toggleText = document.getElementById('toggleText');
+  const signupFields = document.querySelectorAll('.signup-only');
+
+  if (authMode === 'signup') {
+    title.textContent = 'Crea tu cuenta';
+    subtitle.textContent = 'Únete a la comunidad y domina Scrum';
+    btn.textContent = 'Registrarse';
+    signupFields.forEach(f => f.style.display = 'block');
+    toggleText.innerHTML = '¿Ya tienes cuenta? <a href="#" onclick="toggleAuthMode(event)">Inicia sesión</a>';
+  } else {
+    title.textContent = 'Bienvenido de nuevo';
+    subtitle.textContent = 'Ingresa tus credenciales para continuar aprendiendo';
+    btn.textContent = 'Entrar';
+    signupFields.forEach(f => f.style.display = 'none');
+    toggleText.innerHTML = '¿No tienes cuenta? <a href="#" onclick="toggleAuthMode(event)">Regístrate aquí</a>';
+  }
+}
+
+async function handleAuth(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+  const pass = document.getElementById('password').value;
+  const name = document.getElementById('regName').value;
+  const code = document.getElementById('regCode').value;
+  
+  if(!window.firebaseAuth) {
+    alert("Error: Firebase no se ha inicializado correctamente. Revisa tu configuración en index.html");
+    return;
+  }
+  
+  const { auth, db, ref, set, createUserWithEmailAndPassword, signInWithEmailAndPassword } = window.firebaseAuth;
+
+  try {
+    if (authMode === 'login') {
+      await signInWithEmailAndPassword(auth, email, pass);
+      alert('¡Bienvenido de nuevo!');
+    } else {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      const user = userCredential.user;
+      
+      // GUARDAR PERFIL EN LA DB
+      await set(ref(db, 'users/' + user.uid + '/profile'), {
+        name: name,
+        code: code,
+        email: email,
+        createdAt: new Date().toISOString()
+      });
+      
+      alert('¡Cuenta creada y datos guardados!');
+    }
+    closeAuthModal();
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+// Escuchar cambios en la sesión
+setTimeout(() => {
+  if(!window.firebaseAuth) return;
+  
+  const { auth, db, ref, onValue, onAuthStateChanged, signOut } = window.firebaseAuth;
+  onAuthStateChanged(auth, (user) => {
+    const navItem = document.getElementById('authNavItem');
+    if (user) {
+      // Intentar obtener el nombre desde el perfil en la DB
+      const profileRef = ref(db, 'users/' + user.uid + '/profile');
+      onValue(profileRef, (snapshot) => {
+        const data = snapshot.val();
+        const displayName = (data && data.name) ? data.name : user.email.split('@')[0];
+        const initial = displayName.charAt(0).toUpperCase();
+        
+        navItem.innerHTML = `
+          <div class="user-profile">
+            <div class="user-avatar">${initial}</div>
+            <span style="font-size:.85rem; font-weight:500">${displayName}</span>
+            <button onclick="window.firebaseAuth.signOut(window.firebaseAuth.auth)" title="Cerrar Sesión" style="background:none; border:none; color:var(--pink); cursor:pointer; font-size:1.2rem; margin-left:.5rem">✕</button>
+          </div>
+        `;
+      });
+    } else {
+      navItem.innerHTML = `<button class="nav-auth-btn" onclick="openAuthModal()">Iniciar Sesión</button>`;
+    }
+  });
+}, 1000);
+
+async function handleGoogleLogin() {
+  if(!window.firebaseAuth) {
+    alert("Error: Firebase no se ha inicializado correctamente.");
+    return;
+  }
+  
+  const { auth, GoogleAuthProvider, signInWithPopup } = window.firebaseAuth;
+  const provider = new GoogleAuthProvider();
+  
+  try {
+    await signInWithPopup(auth, provider);
+    alert('¡Sesión iniciada con Google!');
+    closeAuthModal();
+  } catch (error) {
+    console.error(error);
+    alert('Error al iniciar sesión con Google: ' + error.message);
+  }
+}
+
+// === DATABASE LOGIC ===
+async function saveScore(gameName, score, total) {
+  if(!window.firebaseAuth || !window.firebaseAuth.auth.currentUser) return;
+  
+  const { auth, db, ref, set } = window.firebaseAuth;
+  const user = auth.currentUser;
+
+  try {
+    const userRef = ref(db, 'users/' + user.uid + '/scores/' + gameName);
+    await set(userRef, {
+      score: score,
+      total: total,
+      date: new Date().toISOString(),
+      email: user.email
+    });
+    console.log(`Puntaje de ${gameName} guardado en Firebase.`);
+  } catch (error) {
+    console.error("Error al guardar puntaje:", error);
+  }
+}

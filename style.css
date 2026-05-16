@@ -243,3 +243,141 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
   .game-box{padding:1.2rem}
   .tf-btns{flex-direction:column}
 }
+
+/* AUTH MODAL STYLES */
+.nav-auth-btn {
+  background: var(--grad);
+  border: none;
+  color: #fff;
+  padding: .5rem 1.2rem;
+  border-radius: 99px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: .85rem;
+  transition: .3s;
+}
+
+.auth-modal {
+  max-width: 400px;
+  text-align: left;
+}
+
+.auth-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.input-group {
+  margin-bottom: 1.2rem;
+}
+
+.input-group label {
+  display: block;
+  font-size: .85rem;
+  color: var(--text2);
+  margin-bottom: .5rem;
+}
+
+.input-group input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: .8rem 1rem;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: inherit;
+  transition: .3s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--purple);
+  background: var(--bg2);
+}
+
+.auth-submit {
+  width: 100%;
+  margin-top: 1rem;
+  cursor: pointer;
+  border: none;
+}
+
+.auth-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: .9rem;
+  color: var(--text2);
+}
+
+.auth-footer a {
+  color: var(--pink);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  background: var(--card);
+  padding: .4rem 1rem;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+}
+
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  background: var(--grad);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: .75rem;
+}
+
+/* GOOGLE AUTH STYLES */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+  color: var(--text2);
+  font-size: .8rem;
+}
+
+.auth-divider::before, .auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border);
+}
+
+.auth-divider span {
+  padding: 0 1rem;
+}
+
+.google-btn {
+  width: 100%;
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: .8rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .8rem;
+  cursor: pointer;
+  transition: .3s;
+}
+
+.google-btn:hover {
+  background: #f1f1f1;
+  transform: translateY(-2px);
+}
+
+.google-btn img {
+  width: 18px;
+}
