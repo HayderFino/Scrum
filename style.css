@@ -381,3 +381,66 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 .google-btn img {
   width: 18px;
 }
+
+/* PROFILE MODAL STYLES */
+.profile-modal {
+  text-align: center;
+  max-width: 400px !important;
+}
+.profile-header {
+  margin-bottom: 2rem;
+}
+.profile-avatar-large {
+  width: 80px;
+  height: 80px;
+  background: var(--grad);
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  box-shadow: 0 0 20px #7c3aed50;
+  color: white;
+}
+.profile-badge {
+  background: var(--card-h);
+  padding: .3rem 1rem;
+  border-radius: 99px;
+  font-size: .85rem;
+  border: 1px solid var(--border);
+  color: var(--violet);
+  display: inline-block;
+}
+.profile-stats {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+}
+.profile-stats h4 {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  color: var(--text);
+}
+.stats-grid {
+  display: grid;
+  gap: .8rem;
+}
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: .6rem 1rem;
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  font-size: .9rem;
+  border: 1px solid var(--border);
+}
+.stat-item span {
+  color: var(--text2);
+}
+.stat-item strong {
+  color: var(--pink);
+}
+

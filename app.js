@@ -377,14 +377,47 @@ setTimeout(() => {
     const navItem = document.getElementById('authNavItem');
     const initial = name.charAt(0).toUpperCase();
     navItem.innerHTML = `
-      <div class="user-profile">
+      <div class="user-profile" onclick="openProfileModal()" style="cursor:pointer">
         <div class="user-avatar">${initial}</div>
         <span style="font-size:.85rem; font-weight:500">${name}</span>
-        <button onclick="window.firebaseAuth.signOut(window.firebaseAuth.auth)" title="Cerrar Sesión" style="background:none; border:none; color:var(--pink); cursor:pointer; font-size:1.2rem; margin-left:.5rem">✕</button>
+        <button onclick="event.stopPropagation(); window.firebaseAuth.signOut(window.firebaseAuth.auth)" title="Cerrar Sesión" style="background:none; border:none; color:var(--pink); cursor:pointer; font-size:1.2rem; margin-left:.5rem">✕</button>
       </div>
     `;
   }
 }, 1000);
+
+// === PROFILE LOGIC ===
+function openProfileModal() {
+  if(!window.firebaseAuth) return;
+  const { auth, db, ref, onValue } = window.firebaseAuth;
+  const user = auth.currentUser;
+  if (!user) return;
+
+  // Cargar datos de perfil y puntajes
+  const userRef = ref(db, 'users/' + user.uid);
+  onValue(userRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      const name = data.profile?.name || user.email.split('@')[0];
+      document.getElementById('pName').textContent = name;
+      document.getElementById('pCode').textContent = `Grupo: ${data.profile?.code || '-'}`;
+      document.getElementById('pAvatar').textContent = name.charAt(0).toUpperCase();
+      
+      // Mostrar puntajes
+      const scores = data.scores || {};
+      document.getElementById('pStats').innerHTML = `
+        <div class="stat-item"><span>Quiz Scrum:</span> <strong>${scores.quiz_scrum?.score || 0}/${scores.quiz_scrum?.total || 6}</strong></div>
+        <div class="stat-item"><span>Verdadero/Falso:</span> <strong>${scores.verdad_falso?.score || 0}/${scores.verdad_falso?.total || 8}</strong></div>
+        <div class="stat-item"><span>Completar Frase:</span> <strong>${scores.completar_frase?.score || 0}/${scores.completar_frase?.total || 5}</strong></div>
+      `;
+    }
+  });
+  document.getElementById('profileModalOverlay').classList.add('open');
+}
+
+function closeProfileModal() {
+  document.getElementById('profileModalOverlay').classList.remove('open');
+}
 
 async function handleGoogleLogin() {
   if(!window.firebaseAuth) {
