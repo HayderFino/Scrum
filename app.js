@@ -514,3 +514,26 @@ async function saveGoogleExtraData() {
     }
   }
 }
+
+// === EXPOSE FUNCTIONS TO WINDOW FOR HTML ONCLICK COMPATIBILITY ===
+window.openAuthModal = openAuthModal;
+window.closeAuthModal = closeAuthModal;
+window.toggleAuthMode = toggleAuthMode;
+window.handleGoogleLogin = handleGoogleLogin;
+window.saveGoogleExtraData = saveGoogleExtraData;
+window.openProfileModal = openProfileModal;
+window.closeProfileModal = closeProfileModal;
+window.toggleValue = toggleValue;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.checkMatch = checkMatch;
+window.resetMatch = resetMatch;
+window.selectQuiz = selectQuiz;
+window.nextQuiz = nextQuiz;
+window.resetQuiz = resetQuiz;
+window.tfAnswer = tfAnswer;
+window.resetTF = resetTF;
+window.checkSort = checkSort;
+window.resetSort = resetSort;
+window.fillAnswer = fillAnswer;
+window.resetFill = resetFill;
